@@ -1,158 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>McMaster Self-hosting Graduate Association</title>
+  <title>McMaster Self Hosting Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap"
-    rel="stylesheet"
-  />
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700;900&display=swap"
+    rel="stylesheet">
   <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-panel: rgba(255, 255, 255, 0.05);
+      --primary: #6366f1;
+      --secondary: #a855f7;
+      --accent: #ec4899;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-cursive: 'Caveat', cursive;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
     }
+
     body {
-      color: #fff;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
     }
+
+    /* Noise Texture */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Background Gradient Blob */
+    .bg-blob {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80vw;
+      height: 80vw;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.1) 30%, rgba(10, 10, 10, 0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* FOSS Wall Container */
+    .foss-wall {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .foss-item {
+      position: absolute;
+      will-change: transform;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .foss-item img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Navigation */
     .nav {
       display: flex;
       justify-content: space-between;
-      padding: 1rem 2rem;
-      background: rgba(0, 0, 0, 0.3);
+      align-items: center;
+      padding: 1.5rem 2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .logo {
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      height: 48px;
+      width: auto;
+      color: #fff;
+      /* Ensure white */
+    }
+
+    .logo-text-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-heading);
       font-size: 1.5rem;
-      font-weight: 700;
+      font-weight: 300;
+      /* Thinner for brackets */
+      color: #fff;
     }
+
+    .logo-bracket {
+      font-size: 2.2rem;
+      /* Tall brackets */
+      font-weight: 100;
+      line-height: 1;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .logo-text {
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.05em;
+    }
+
     .nav-links {
       list-style: none;
       display: flex;
-      gap: 1rem;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: #eee;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover {
-      color: #ffdd57;
-    }
-    .hero {
-      text-align: center;
-      padding: 4rem 2rem;
-    }
-    .hero h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
-    }
-    .hero p {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-    }
-    .btn {
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      background: linear-gradient(45deg, #ff512f, #dd2476);
-      transition: transform 0.2s;
-      color: #fff;
-    }
-    .btn:hover {
-      transform: scale(1.05);
-    }
-    .section {
-      padding: 3rem 2rem;
-      text-align: center;
-    }
-    .section h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 2rem;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 1.5rem;
-      border-radius: 1rem;
-    }
-    .card h3 {
-      margin-bottom: 0.5rem;
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
       font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.3s;
     }
-    .footer {
-      padding: 2rem;
-      background: rgba(0, 0, 0, 0.4);
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 8rem 2rem 6rem;
       text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(3rem, 8vw, 5rem);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 span {
+      display: block;
+      background: linear-gradient(to right, #fff, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      line-height: 1.6;
+    }
+
+    .highlight-cursive {
+      font-family: var(--font-cursive);
+      color: var(--accent);
+      font-size: 1.4em;
+      position: relative;
+      top: 0.1em;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      background: var(--text-main);
+      color: var(--bg-dark);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      font-family: var(--font-heading);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -10px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: translateX(-100%);
+      transition: 0.5s;
+    }
+
+    .btn:hover::after {
+      transform: translateX(100%);
+    }
+
+    /* Sections */
+    .section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .section-desc {
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 4rem;
+      font-size: 1.1rem;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .card p {
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 4rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
       font-size: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 3rem;
+      }
+
+      .nav {
+        flex-direction: column;
+        gap: 1rem;
+      }
     }
   </style>
 </head>
+
 <body>
+  <div class="noise-overlay"></div>
+  <div class="bg-blob"></div>
+
+  <div class="foss-wall" id="fossWall"></div>
+
+  <nav class="nav">
+    <a href="#" class="logo-container">
+      <!-- McMaster Logo -->
+      <img src="m24-wht.png" alt="McMaster Logo" class="logo-icon">
+
+      <div class="logo-text-wrapper">
+        <span class="logo-bracket">(</span>
+        <span class="logo-text">MSHC</span>
+        <span class="logo-bracket">)</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#why">Why Host?</a></li>
+      <li><a href="#join">Join</a></li>
+    </ul>
+  </nav>
+
   <header class="hero">
-    <nav class="nav">
-      <div class="logo">MSGA</div>
-      <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#why">Why Host?</a></li>
-        <li><a href="#join">Join</a></li>
-      </ul>
-    </nav>
     <div class="hero-content">
-      <h1>McMaster Self-hosting Graduate Association</h1>
-      <p>Tired of “the cloud”? So are we. Let’s build our own, because downtime builds character.</p>
-      <button id="joinBtn" class="btn">Join the Self-hosting Cult →</button>
+      <h1>McMaster Self Hosting <br><span>Club</span></h1>
+      <p>Tired of “the cloud”? So are we. Let’s build our own, because <span class="highlight-cursive">downtime builds
+          character</span>.</p>
+      <button id="joinBtn" class="btn">Join the Self Hosting Cult →</button>
     </div>
   </header>
 
   <section id="about" class="section">
-    <h2>What We Do</h2>
-    <p>We run our own servers, our own rules. No vendor lock-in, no mysterious downtime, just pure nerd glory.</p>
+    <h2 class="section-title">What We Do</h2>
+    <p class="section-desc">We run our own servers, our own rules. No vendor lock-in, no mysterious downtime, just pure
+      <span class="highlight-cursive">nerd glory</span>.
+    </p>
   </section>
 
-  <section id="why" class="section grid">
-    <div class="card">
-      <h3>Freedom</h3>
-      <p>Full root access—because sudo is life.</p>
-    </div>
-    <div class="card">
-      <h3>Privacy</h3>
-      <p>Your data, your rules. We don’t peek. Promise.</p>
-    </div>
-    <div class="card">
-      <h3>Experience</h3>
-      <p>Learn Linux the hard way—by breaking it first.</p>
+  <section id="why" class="section">
+    <div class="grid">
+      <div class="card">
+        <h3>Freedom</h3>
+        <p>Full root access because sudo is life.</p>
+      </div>
+      <div class="card">
+        <h3>Privacy</h3>
+        <p>Your data, your rules. We don’t peek. Promise.</p>
+      </div>
+      <div class="card">
+        <h3>Experience</h3>
+        <p>Learn Linux the hard way by breaking it first.</p>
+      </div>
     </div>
   </section>
 
   <section id="join" class="section">
-    <h2>Ready to Dive In?</h2>
-    <p>No experience required—just a willingness to troubleshoot at 2 AM.</p>
-    <button id="joinBtn2" class="btn">Count Me In!</button>
+    <div style="text-align: center;">
+      <h2 class="section-title">Ready to Dive In?</h2>
+      <p class="section-desc">No experience required just a willingness to troubleshoot at 2 AM.</p>
+      <button id="joinBtn2" class="btn">Count Me In!</button>
+    </div>
   </section>
 
   <footer class="footer">
-    <p>© 2025 McMaster Self-hosting Graduate Association. We guarantee at least 0% uptime jokes.</p>
+    <p>© 2025 McMaster Self Hosting Club. We guarantee at least 0% uptime jokes.</p>
   </footer>
 
   <script>
+    // Button Interactivity
     document.querySelectorAll('#joinBtn, #joinBtn2').forEach(btn =>
       btn.addEventListener('click', () => {
         alert("Welcome aboard! Prepare for endless 'Why is Nginx down?' group chats.");
       })
     );
+
+    // FOSS Icons (Simple Icons Slugs)
+    const fossIcons = [
+      'linux', 'docker', 'nginx', 'wireguard', 'jellyfin',
+      'nextcloud', 'pihole', 'homeassistant', 'grafana',
+      'prometheus', 'caddy', 'traefik', 'proxmox', 'kubernetes',
+      'ansible', 'podman', 'syncthing', 'vaultwarden', 'ubuntu',
+      'debian', 'archlinux', 'raspberrypi', 'plex', 'tailscale',
+      'gitea', 'portainer', 'openmediavault', 'truenas'
+    ];
+
+    const wall = document.getElementById('fossWall');
+    const items = [];
+
+    // Configuration
+    const LANE_COUNT = 8; // Number of vertical lanes to prevent overlap
+    const BASE_SPEED = 0.5;
+
+    function initWall() {
+      const width = window.innerWidth;
+      const laneWidth = width / LANE_COUNT;
+
+      // Shuffle icons to avoid repeats in same frame as much as possible
+      let availableIcons = [...fossIcons].sort(() => 0.5 - Math.random());
+
+      // Create items per lane
+      for (let lane = 0; lane < LANE_COUNT; lane++) {
+        // Number of items per lane depends on height, but let's add a few
+        const itemsPerLane = 3;
+
+        for (let i = 0; i < itemsPerLane; i++) {
+          if (availableIcons.length === 0) {
+            availableIcons = [...fossIcons].sort(() => 0.5 - Math.random());
+          }
+          const iconSlug = availableIcons.pop();
+          createItem(lane, laneWidth, iconSlug, i * (100 / itemsPerLane));
+        }
+      }
+    }
+
+    function createItem(lane, laneWidth, iconSlug, startYPercent) {
+      const el = document.createElement('div');
+      el.classList.add('foss-item');
+
+      const img = document.createElement('img');
+      img.src = `https://cdn.simpleicons.org/${iconSlug}/ffffff`;
+      el.appendChild(img);
+
+      // Depth calculation (0 = far/small/slow/blurred, 1 = near/big/fast/clear)
+      const depth = Math.random();
+
+      // Size: 30px to 80px
+      const size = 30 + (depth * 50);
+
+      // Blur: 0px (near) to 4px (far) - actually reverse logic for depth usually
+      // Let's say depth 1 is close (clear), depth 0 is far (blurred)
+      const blur = (1 - depth) * 3;
+
+      // Opacity: 0.1 to 0.4
+      const opacity = 0.1 + (depth * 0.3);
+
+      // Speed
+      const speed = BASE_SPEED + (depth * 0.5);
+
+      // Position within lane (centered with some jitter)
+      const jitter = (Math.random() - 0.5) * (laneWidth * 0.4);
+      const x = (lane * laneWidth) + (laneWidth / 2) + jitter - (size / 2);
+
+      // Initial Y
+      let y = (startYPercent / 100) * window.innerHeight;
+      // Randomize start Y a bit so they don't align perfectly
+      y += (Math.random() - 0.5) * 100;
+
+      // Apply styles
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.left = `${x}px`;
+      el.style.filter = `blur(${blur}px)`;
+      el.style.opacity = opacity;
+
+      // Store state
+      const itemState = {
+        el,
+        y,
+        speed,
+        depth,
+        size
+      };
+
+      wall.appendChild(el);
+      items.push(itemState);
+    }
+
+    function animate() {
+      const height = window.innerHeight;
+
+      items.forEach(item => {
+        item.y += item.speed;
+
+        // Reset if off screen
+        if (item.y > height) {
+          item.y = -item.size - (Math.random() * 100); // Reset above screen
+
+          // Optional: re-randomize x-jitter within same lane? 
+          // For now keep simple vertical rain
+        }
+
+        item.el.style.transform = `translateY(${item.y}px)`;
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    initWall();
+    animate();
+
+    // Re-init on resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        wall.innerHTML = '';
+        items.length = 0;
+        initWall();
+      }, 200);
+    });
   </script>
 </body>
+
 </html>
