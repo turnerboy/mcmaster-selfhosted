@@ -959,6 +959,9 @@
     </div>
   </div>
 
+  <!-- Baserow Configuration -->
+  <script src="config.js"></script>
+
   <script>
     // Modal functionality
     const modal = document.getElementById('joinModal');
@@ -997,22 +1000,18 @@
         studentEmail: document.getElementById('studentEmail').value
       };
 
-      // TODO: Replace with your actual Baserow configuration
-      const BASEROW_API_URL = 'https://data.sriganeshk.com/api/database/rows/table/TABLE_ID/';
-      const BASEROW_TOKEN = 'YOUR_API_TOKEN_HERE';
-
       try {
-        const response = await fetch(BASEROW_API_URL, {
+        const response = await fetch(BASEROW_CONFIG.apiUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Token ${BASEROW_TOKEN}`,
+            'Authorization': `Token ${BASEROW_CONFIG.apiToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            field_XXXX: formData.firstName,     // Replace XXXX with your field ID
-            field_YYYY: formData.lastName,      // Replace YYYY with your field ID
-            field_ZZZZ: formData.studentId,     // Replace ZZZZ with your field ID
-            field_AAAA: formData.studentEmail   // Replace AAAA with your field ID
+            [BASEROW_CONFIG.fields.firstName]: formData.firstName,
+            [BASEROW_CONFIG.fields.lastName]: formData.lastName,
+            [BASEROW_CONFIG.fields.studentId]: formData.studentId,
+            [BASEROW_CONFIG.fields.studentEmail]: formData.studentEmail
           })
         });
 
@@ -1020,6 +1019,7 @@
           alert('🎉 Welcome aboard! Prepare for endless "Why is Nginx down?" group chats.');
           joinForm.reset();
           modal.classList.remove('active');
+          document.body.style.overflow = ''; // Re-enable background scroll
         } else {
           const error = await response.json();
           console.error('Baserow error:', error);
