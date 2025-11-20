@@ -959,10 +959,30 @@
     </div>
   </div>
 
-  <!-- Baserow Configuration -->
-  <script src="config.js"></script>
-
   <script>
+    // Baserow Configuration
+    // IMPORTANT: Replace these placeholder values with your actual Baserow credentials
+    // See config.example.js for the format
+    // 
+    // For deployment:
+    // Option 1: Create config.js locally (git-ignored) and deploy it separately
+    // Option 2: Replace these values before deploying
+    // Option 3: Set window.BASEROW_CONFIG before this script loads
+    const BASEROW_CONFIG = window.BASEROW_CONFIG || {
+      apiUrl: 'https://data.sriganeshk.com/api/database/rows/table/YOUR_TABLE_ID/',
+      apiToken: 'YOUR_API_TOKEN_HERE',
+      fields: {
+        firstName: 'field_XXXX',
+        lastName: 'field_YYYY',
+        studentId: 'field_ZZZZ',
+        studentEmail: 'field_AAAA'
+      }
+    };
+
+    // Check if configuration is set
+    const isConfigured = BASEROW_CONFIG.apiToken !== 'YOUR_API_TOKEN_HERE' &&
+      BASEROW_CONFIG.apiUrl.indexOf('YOUR_TABLE_ID') === -1;
+
     // Modal functionality
     const modal = document.getElementById('joinModal');
     const closeBtn = document.getElementById('closeModal');
@@ -989,18 +1009,49 @@
       }
     });
 
-    // Form submission
+    // Form submission with validation and error handling
     joinForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Check if Baserow is configured
+      if (!isConfigured) {
+        alert('⚠️ Form not configured yet!\n\nThe website administrator needs to set up the Baserow connection.\nPlease check back later or contact the club.');
+        return;
+      }
+
+      // Collect form data
       const formData = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        studentId: document.getElementById('studentId').value,
-        studentEmail: document.getElementById('studentEmail').value
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        studentId: document.getElementById('studentId').value.trim(),
+        studentEmail: document.getElementById('studentEmail').value.trim()
       };
 
+      // Basic validation
+      if (!formData.firstName || !formData.lastName || !formData.studentId || !formData.studentEmail) {
+        alert('Please fill out all fields.');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.studentEmail)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      // Disable submit button to prevent double submission
+      const submitBtn = joinForm.querySelector('.submit-btn');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
       try {
+        // Check if fetch is supported (it should be in all modern browsers)
+        if (typeof fetch === 'undefined') {
+          throw new Error('Your browser does not support this feature. Please update your browser.');
+        }
+
         const response = await fetch(BASEROW_CONFIG.apiUrl, {
           method: 'POST',
           headers: {
@@ -1019,15 +1070,25 @@
           alert('🎉 Welcome aboard! Prepare for endless "Why is Nginx down?" group chats.');
           joinForm.reset();
           modal.classList.remove('active');
-          document.body.style.overflow = ''; // Re-enable background scroll
+          document.body.style.overflow = '';
         } else {
-          const error = await response.json();
+          const error = await response.json().catch(() => ({ error: 'Unknown error' }));
           console.error('Baserow error:', error);
-          alert('Oops! Something went wrong. Please try again.');
+          alert('Oops! Something went wrong. Please try again or contact the club.');
         }
       } catch (error) {
-        console.error('Network error:', error);
-        alert('Network error. Please check your connection and try again.');
+        console.error('Submission error:', error);
+        if (error.message && error.message.includes('NetworkError')) {
+          alert('Network error. Please check your internet connection and try again.');
+        } else if (error.message && error.message.includes('CORS')) {
+          alert('Configuration error. Please contact the club administrator.');
+        } else {
+          alert('An error occurred. Please try again or contact the club.');
+        }
+      } finally {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
       }
     });
 
