@@ -2,9 +2,18 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>McMaster Self Hosting Club</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="McMaster Self Hosting Club - Learn to run your own servers, your own rules. Join the self-hosting revolution!">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.simpleicons.org">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap"
+    rel="stylesheet">
+  <title>McMaster Self Hosting Club (MSHC)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -143,6 +152,7 @@
       font-weight: 700;
       background: linear-gradient(to right, var(--primary), var(--accent));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: 0.05em;
     }
@@ -187,6 +197,7 @@
       display: block;
       background: linear-gradient(to right, #fff, #9ca3af);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -562,12 +573,14 @@
       stroke-linejoin: round;
       filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
       overflow: visible;
+      will-change: transform;
     }
 
-    /* Animation Groups */
+    /* Animation Groups - Optimized with will-change */
     .crab-body-group {
       animation: raveBody 0.48s ease-in-out infinite alternate;
       transform-origin: center bottom;
+      will-change: transform;
     }
 
     .crab-claw-left {
@@ -960,28 +973,9 @@
   </div>
 
   <script>
-    // Baserow Configuration
-    // IMPORTANT: Replace these placeholder values with your actual Baserow credentials
-    // See config.example.js for the format
-    // 
-    // For deployment:
-    // Option 1: Create config.js locally (git-ignored) and deploy it separately
-    // Option 2: Replace these values before deploying
-    // Option 3: Set window.BASEROW_CONFIG before this script loads
-    const BASEROW_CONFIG = window.BASEROW_CONFIG || {
-      apiUrl: 'https://data.sriganeshk.com/api/database/rows/table/YOUR_TABLE_ID/',
-      apiToken: 'YOUR_API_TOKEN_HERE',
-      fields: {
-        firstName: 'field_XXXX',
-        lastName: 'field_YYYY',
-        studentId: 'field_ZZZZ',
-        studentEmail: 'field_AAAA'
-      }
-    };
-
-    // Check if configuration is set
-    const isConfigured = BASEROW_CONFIG.apiToken !== 'YOUR_API_TOKEN_HERE' &&
-      BASEROW_CONFIG.apiUrl.indexOf('YOUR_TABLE_ID') === -1;
+    // Form Submission via Cloudflare Worker
+    // No API tokens exposed! The worker handles all Baserow communication securely.
+    // See cloudflare_worker_setup.md for deployment instructions.
 
     // Modal functionality
     const modal = document.getElementById('joinModal');
@@ -1009,15 +1003,9 @@
       }
     });
 
-    // Form submission with validation and error handling
+    // Form submission using Cloudflare Worker proxy
     joinForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      // Check if Baserow is configured
-      if (!isConfigured) {
-        alert('⚠️ Form not configured yet!\n\nThe website administrator needs to set up the Baserow connection.\nPlease check back later or contact the club.');
-        return;
-      }
 
       // Collect form data
       const formData = {
@@ -1047,41 +1035,32 @@
       submitBtn.textContent = 'Submitting...';
 
       try {
-        // Check if fetch is supported (it should be in all modern browsers)
-        if (typeof fetch === 'undefined') {
-          throw new Error('Your browser does not support this feature. Please update your browser.');
-        }
+        // Cloudflare Worker URL (securely handles Baserow API)
+        const WORKER_URL = 'https://baserow-form-proxy.sriganesh-kaniarasu.workers.dev/';
 
-        const response = await fetch(BASEROW_CONFIG.apiUrl, {
+        const response = await fetch(WORKER_URL, {
           method: 'POST',
           headers: {
-            'Authorization': `Token ${BASEROW_CONFIG.apiToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            [BASEROW_CONFIG.fields.firstName]: formData.firstName,
-            [BASEROW_CONFIG.fields.lastName]: formData.lastName,
-            [BASEROW_CONFIG.fields.studentId]: formData.studentId,
-            [BASEROW_CONFIG.fields.studentEmail]: formData.studentEmail
-          })
+          body: JSON.stringify(formData)
         });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        if (response.ok && result.success) {
           alert('🎉 Welcome aboard! Prepare for endless "Why is Nginx down?" group chats.');
           joinForm.reset();
           modal.classList.remove('active');
           document.body.style.overflow = '';
         } else {
-          const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('Baserow error:', error);
-          alert('Oops! Something went wrong. Please try again or contact the club.');
+          console.error('Submission error:', result);
+          alert(result.error || 'Oops! Something went wrong. Please try again or contact the club.');
         }
       } catch (error) {
-        console.error('Submission error:', error);
-        if (error.message && error.message.includes('NetworkError')) {
+        console.error('Network error:', error);
+        if (error.message && error.message.includes('Failed to fetch')) {
           alert('Network error. Please check your internet connection and try again.');
-        } else if (error.message && error.message.includes('CORS')) {
-          alert('Configuration error. Please contact the club administrator.');
         } else {
           alert('An error occurred. Please try again or contact the club.');
         }
